@@ -2,13 +2,36 @@ import asyncio
 
 
 class RateLimiter:
-    def __init__(self, rate):
+    """
+    A rate limiter class that limits the rate of acquiring tokens.
+
+    Args:
+        rate (float): The rate at which tokens can be acquired per second.
+
+    Attributes:
+        rate (float): The rate at which tokens can be acquired per second.
+        tokens (float): The number of tokens available.
+        timestamp (float): The timestamp of the last token acquisition.
+        lock (asyncio.Lock): A lock to ensure thread-safe access to the rate limiter.
+
+    Methods:
+        acquire: Acquires a token from the rate limiter.
+
+    """
+
+    def __init__(self, rate: float) -> None:
         self.rate = rate
-        self.tokens = 0
+        self.tokens = 0.0
         self.timestamp = asyncio.get_event_loop().time()
         self.lock = asyncio.Lock()
 
-    async def acquire(self):
+    async def acquire(self) -> None:
+        """
+        Acquires a token from the rate limiter.
+
+        If there are no tokens available, the method will sleep until a token becomes available.
+
+        """
         async with self.lock:
             current_time = asyncio.get_event_loop().time()
             elapsed_time = current_time - self.timestamp
