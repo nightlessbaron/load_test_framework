@@ -1,34 +1,18 @@
 import json
 import matplotlib.pyplot as plt
+import os
 
 
 class Reporter:
-    """
-    A class that records and generates reports based on the responses of requests made during load testing.
-    """
-
-    def __init__(self) -> None:
+    def __init__(self, output_dir="output"):
         self.latencies = []
         self.errors = 0
         self.total_requests = 0
         self.successful_requests = 0
+        self.output_dir = output_dir
+        os.makedirs(self.output_dir, exist_ok=True)
 
-    def record_response(
-        self,
-        latency: float,
-        status_code: int,
-        expected_status: int = None,
-        error: Exception = None,
-    ) -> None:
-        """
-        Records the response of a request made during load testing.
-
-        Args:
-            latency (float): The latency of the request in seconds.
-            status_code (int): The status code of the response.
-            expected_status (int, optional): The expected status code. Defaults to None.
-            error (Exception, optional): The error that occurred during the request. Defaults to None.
-        """
+    def record_response(self, latency, status_code, expected_status=None, error=None):
         if error:
             self.errors += 1
         elif status_code == expected_status:
@@ -38,17 +22,7 @@ class Reporter:
         self.latencies.append(latency)
         self.total_requests += 1
 
-    def generate_report(self, output: str, verbose: bool) -> None:
-        """
-        Generates a report based on the collected data.
-
-        Args:
-            output (str): The file path to save the report as a JSON file.
-            verbose (bool): If True, prints the report to the console.
-
-        Returns:
-            None
-        """
+    def generate_report(self, output, verbose):
         avg_latency = sum(self.latencies) / len(self.latencies) if self.latencies else 0
         error_rate = self.errors / self.total_requests if self.total_requests else 0
         success_rate = (
@@ -76,32 +50,11 @@ class Reporter:
 
         self.generate_graphs()
 
-    def calculate_percentile(self, percentile: float) -> float:
-        """
-        Calculates the specified percentile of the latencies.
-
-        Args:
-            percentile (float): The percentile to calculate. Should be a value between 0 and 100.
-
-        Returns:
-            float: The latency value at the specified percentile.
-
-        """
+    def calculate_percentile(self, percentile):
         size = len(self.latencies)
         return sorted(self.latencies)[int(size * percentile / 100) - 1] if size else 0
 
-    def generate_graphs(self) -> None:
-        """
-        Generates and displays two graphs related to latency.
-
-        The first graph is a histogram showing the distribution of latencies.
-        The x-axis represents the latency in seconds, and the y-axis represents the frequency.
-
-        The second graph is a time-series plot showing the latency over time.
-        The x-axis represents the request number, and the y-axis represents the latency in seconds.
-
-        The generated graphs are saved as "performance_report.png" and displayed on the screen.
-        """
+    def generate_graphs(self):
         plt.figure(figsize=(12, 6))
 
         # Latency Histogram
@@ -119,5 +72,5 @@ class Reporter:
         plt.ylabel("Latency (seconds)")
 
         plt.tight_layout()
-        plt.savefig("performance_report.png")
+        plt.savefig(os.path.join(self.output_dir, "performance_report.png"))
         plt.show()
