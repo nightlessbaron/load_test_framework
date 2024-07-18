@@ -33,10 +33,10 @@ cd load_test_framework
 
 ```sh
 docker build -t http-load_test .
-docker run -it --rm http-load_test <url> --qps <qps> --duration <duration> --concurrency <concurrency> --timeout <timeout> --method <method> --expected_status <status_code> --output test_report.json
+docker run -it --rm -v "$(pwd)/output:/usr/src/app/output" http-load_test <url> --qps <qps> --duration <dur> --concurrency <con> --timeout <timeout> --method <method> --expected_status <status> --output <output file>
 ```
 
 An example command:
 ```sh
-docker run -it --rm http-load_test https://jsonplaceholder.typicode.com/posts/1 --qps 10 --duration 10 --concurrency 10 --timeout 5 --method GET --expected_status 201 --output test_report.json
+docker run -it --rm -v "$(pwd)/output:/usr/src/app/output" http-load_test https://jsonplaceholder.typicode.com/posts/1 --qps 10 --duration 10 --concurrency 10 --timeout 5 --method GET --expected_status 201 --output output/test_report.json
 ```
